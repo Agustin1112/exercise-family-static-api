@@ -1,44 +1,51 @@
-"""
-This module takes care of starting the API Server, Loading the DB and Adding the endpoints
-"""
-import os
-from flask import Flask, request, jsonify, url_for
-from flask_cors import CORS
-from utils import APIException, generate_sitemap
-from datastructures import FamilyStructure
-#from models import Person
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
-app.url_map.strict_slashes = False
-CORS(app)
 
-# create the jackson family object
-jackson_family = FamilyStructure("Jackson")
+# Miembros iniciales
+members = [
+    {"first_name": "Tommy", "id": 1, "age": 33, "lucky_numbers": [4, 6, 23]},
+    {"first_name": "Jane", "id": 2, "age": 35, "lucky_numbers": [12, 42, 7]},
+    {"first_name": "Alice", "id": 3, "age": 25, "lucky_numbers": [34, 65, 23, 4, 6]}
+]
 
-# Handle/serialize errors like a JSON object
-@app.errorhandler(APIException)
-def handle_invalid_usage(error):
-    return jsonify(error.to_dict()), error.status_code
-
-# generate sitemap with all your endpoints
-@app.route('/')
-def sitemap():
-    return generate_sitemap(app)
-
+# Ruta para obtener todos los miembros
 @app.route('/members', methods=['GET'])
-def handle_hello():
+def get_members():
+    return jsonify(members)
 
-    # this is how you can use the Family datastructure by calling its methods
-    members = jackson_family.get_all_members()
-    response_body = {
-        "hello": "world",
-        "family": members
-    }
+# Ruta para obtener un miembro por ID
+@app.route('/member/<int:id>', methods=['GET'])
+def get_member(id):
+    member = next((m for m in members if m["id"] == id), None)
+    if member:
+        return jsonify(member)
+    else:
+        return jsonify({"error": "Member not found"}), 404
 
+# Ruta para agregar un nuevo miembro
+@app.route('/member', methods=['POST'])
+def add_member():
+    new_member = request.get_json()
+    members.append(new_member)
+    return jsonify(new_member), 201
 
-    return jsonify(response_body), 200
+# Ruta para eliminar un miembro por ID
+@app.route('/member/<int:id>', methods=['DELETE'])
+def delete_member(id):
+    global members
+    member = next((m for m in members if m["id"] == id), None)
+    if member:
+        members = [m for m in members if m["id"] != id]
+        return jsonify({"done": True}), 200
+    else:
+        return jsonify({"error": "Member not found"}), 404
 
-# this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
-    PORT = int(os.environ.get('PORT', 3000))
-    app.run(host='0.0.0.0', port=PORT, debug=True)
+    app.run(debug=True)
+
+
+
+
+
+

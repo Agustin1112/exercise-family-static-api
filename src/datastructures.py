@@ -1,36 +1,38 @@
-
-"""
-update this file to implement the following already declared methods:
-- add_member: Should add a member to the self._members list
-- delete_member: Should delete a member from the self._members list
-- update_member: Should update a member from the self._members list
-- get_member: Should return a member from the self._members list
-"""
-from random import randint
-
 class FamilyStructure:
     def __init__(self, last_name):
         self.last_name = last_name
+        self._next_id = 1  # ID inicial
+        self._members = []  # Lista de miembros
 
-        # example list of members
-        self._members = []
+    # Método para generar IDs únicos
+    def _generate_id(self):
+        generated_id = self._next_id
+        self._next_id += 1
+        return generated_id
 
-    # read-only: Use this method to generate random members ID's when adding members into the list
-    def _generateId(self):
-        return randint(0, 99999999)
-
+    # Método para agregar un nuevo miembro
     def add_member(self, member):
-        # fill this method and update the return
-        pass
+        member['id'] = self._generate_id()  # Asigno un ID único al miembro
+        member['last_name'] = self.last_name  # Aseguro que el apellido sea el correcto
+        self._members.append(member)  # Agrego el miembro a la lista
 
+    # Método para eliminar un miembro
     def delete_member(self, id):
-        # fill this method and update the return
-        pass
+        for member in self._members:
+            if member['id'] == id:
+                self._members.remove(member)  # Elimino el miembro de la lista
+                return True  # Retorno True si se eliminó correctamente
+        return False  # Retorno False si no encuentro el miembro
 
+    # Método para obtener un miembro específico
     def get_member(self, id):
-        # fill this method and update the return
-        pass
+        for member in self._members:
+            if member['id'] == id:
+                return member  # Devuelvo el miembro si lo encuentro
+        return None  # Retorno None si no lo encuentro
 
-    # this method is done, it returns a list with all the family members
+    # Método para obtener todos los miembros
     def get_all_members(self):
-        return self._members
+        return self._members  # Devuelvo la lista de todos los miembros
+
+
